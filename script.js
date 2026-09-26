@@ -280,6 +280,7 @@
     const btn = e.target.closest('.key');
     if (!btn) return;
     flash(btn);
+    countPress();
 
     if (btn.dataset.num !== undefined) return inputDigit(btn.dataset.num);
     if (btn.dataset.seq) return inputSequence(btn.dataset.seq);
@@ -316,6 +317,9 @@
   document.addEventListener('keydown', function (e) {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const key = e.key;
+
+    // Настоящий ввод с клавиатуры, не служебные клавиши
+    if (/^[0-9]$/.test(key) || /^[+\-*/.=]$/.test(key) || key === ',') countPress();
 
     if (/^[0-9]$/.test(key)) {
       flash(keysEl.querySelector('[data-num="' + key + '"]'));
@@ -404,6 +408,73 @@
   themeToggle.addEventListener('click', function () {
     applyTheme(!document.body.classList.contains('theme-light'));
   });
+
+  /* ---------- окно оплаты после 5 нажатий ---------- */
+
+  const payModal = document.getElementById('payModal');
+  const pressLimit = 5;
+  let presses = 0;
+  let lastFocus = null;
+
+  function openPay() {
+    if (!payModal || !payModal.hidden) return;
+    lastFocus = document.activeElement;
+    payModal.hidden = false;
+    document.body.classList.add('modal-open');
+    const pay = document.getElementById('payBtn');
+    if (pay) pay.focus();
+  }
+
+  function closePay() {
+    if (!payModal || payModal.hidden) return;
+    payModal.hidden = true;
+    document.body.classList.remove('modal-open');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+    lastFocus = null;
+  }
+
+  // Считаем и мышь, и клавиатуру — иначе счётчик обходится одной рукой.
+  function countPress() {
+    presses++;
+    if (presses === pressLimit) openPay();
+  }
+
+  if (payModal) {
+    payModal.addEventListener('click', function (e) {
+      if (e.target.closest('[data-close]')) closePay();
+    });
+
+    const payBtn = document.getElementById('payBtn');
+    if (payBtn) {
+      payBtn.addEventListener('click', function () {
+        payBtn.textContent = 'Оплачено (демо)';
+        setTimeout(closePay, 900);
+      });
+    }
+
+    // Esc закрывает; Tab не должен уводить фокус за пределы окна
+    payModal.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        return closePay();
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = payModal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+  }
 
   render();
 })();

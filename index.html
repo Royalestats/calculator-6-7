@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <main class="calc" role="application" aria-label="Калькулятор">
+      <header class="calc__head">
+        <h1>Калькулятор</h1>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему" title="Переключить тему">
+          <span class="theme-toggle__icon" id="themeIcon">🌙</span>
+        </button>
+      </header>
+
+      <div class="history" id="history" aria-live="polite"></div>
+
+      <div class="display">
+        <div class="display__expr" id="expr">&nbsp;</div>
+        <output class="display__value" id="value">0</output>
+      </div>
+
+      <div class="keys" id="keys">
+        <button class="key key--fn" data-action="clear" type="button">AC</button>
+        <button class="key key--fn" data-action="sign" type="button">±</button>
+        <button class="key key--fn" data-action="percent" type="button">%</button>
+        <button class="key key--op" data-op="/" type="button">÷</button>
+
+        <button class="key" data-num="7" type="button">7</button>
+        <button class="key" data-num="8" type="button">8</button>
+        <button class="key" data-num="9" type="button">9</button>
+        <button class="key key--op" data-op="*" type="button">×</button>
+
+        <button class="key" data-num="4" type="button">4</button>
+        <button class="key" data-num="5" type="button">5</button>
+        <button class="key" data-num="6" type="button">6</button>
+        <button class="key key--op" data-op="-" type="button">−</button>
+
+        <button class="key" data-num="1" type="button">1</button>
+        <button class="key" data-num="2" type="button">2</button>
+        <button class="key" data-num="3" type="button">3</button>
+        <button class="key key--op" data-op="+" type="button">+</button>
+
+        <button class="key key--wide" data-num="0" type="button">0</button>
+        <button class="key" data-action="dot" type="button">.</button>
+        <button class="key key--eq" data-action="equals" type="button">=</button>
+
+        <button class="key key--seq" data-seq="67" type="button">67</button>
+      </div>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

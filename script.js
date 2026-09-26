@@ -13,7 +13,8 @@
     acc: null,       // накопленный результат
     op: null,        // отложенная операция
     fresh: true,     // следующая цифра начинает новое число
-    error: false
+    error: false,
+    errorText: ''
   };
 
   /* ---------- форматирование ---------- */
@@ -44,7 +45,7 @@
     if (s.includes('.')) {
       const [i, f] = s.split('.');
       const fi = i === '' ? '0' : i;
-      return (neg ? '-' : '') + fi.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + '.' + f;
+      return (neg ? '-' : '') + fi.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ',' + f;
     }
     if (s.length > 1) s = s.replace(/^0+(?=\d)/, '');
     return (neg ? '-' : '') + s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
@@ -70,7 +71,7 @@
     state.acc = null;
     state.op = null;
     state.fresh = true;
-    exprEl.textContent = message || '';
+    state.errorText = message || 'Деление на ноль';
     render();
   }
 
@@ -80,10 +81,12 @@
     valueEl.textContent = state.error ? state.entry : formatEntry(state.entry);
     valueEl.classList.toggle('is-error', state.error);
 
-    if (state.op && state.acc !== null) {
+    if (state.error) {
+      exprEl.textContent = state.errorText;
+    } else if (state.op && state.acc !== null) {
       exprEl.textContent = format(state.acc) + ' ' + OP_SYMBOL[state.op];
     } else {
-      exprEl.textContent = ' ';
+      exprEl.textContent = ' ';
     }
   }
 
@@ -126,11 +129,15 @@
     render();
   }
 
+  // назначается блоком звука ниже, чтобы inputSequence не зависел от DOM-звука
+  let onSequence = null;
+
   // быстрый ввод: одна кнопка вводит сразу несколько цифр (например «67»)
   function inputSequence(seq) {
     if (state.error) return;
     for (const ch of String(seq)) pushDigit(ch);
     render();
+    if (onSequence) onSequence(String(seq));
   }
 
   function inputDot() {
@@ -282,6 +289,40 @@
       if (key === '%') return percent();
       if (key === '.' || key === ',') return inputDot();
       return setOperator(key);
+    }
+  });
+
+  /* ---------- звук 67 GAZAN ---------- */
+
+  const sfx = document.getElementById('sfx');
+  const soundBtn = document.getElementById('soundToggle');
+  const soundIcon = document.getElementById('soundIcon');
+
+  sfx.volume = 0.85;
+
+  // мем проигрывается по кнопке «67», но только если звук включён
+  onSequence = function (seq) {
+    if (seq === '67' && !sfx.paused) playSfx();
+  };
+
+  function playSfx() {
+    // повторное нажатие начинает звук с начала
+    sfx.currentTime = 0;
+    const p = sfx.play();
+    if (p && p.catch) p.catch(() => {});  // автоблокировка не должна сыпать ошибками
+  }
+
+  soundBtn.addEventListener('click', function () {
+    if (sfx.paused) {
+      playSfx();
+      soundBtn.setAttribute('aria-pressed', 'true');
+      soundIcon.textContent = '🔊';
+      soundBtn.classList.add('is-on');
+    } else {
+      sfx.pause();
+      soundBtn.setAttribute('aria-pressed', 'false');
+      soundIcon.textContent = '🔇';
+      soundBtn.classList.remove('is-on');
     }
   });
 

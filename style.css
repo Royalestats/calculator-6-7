@@ -9,6 +9,8 @@
   --fn: #2a3050;
   --shadow: 0 24px 60px rgba(0, 0, 0, .45);
   --gif: url("assets/bg.gif");
+  --gif-sm: url("assets/bg-sm.gif");
+  --gif-poster: url("assets/bg-poster.jpg");
   --dim: .2;
   --glow-1: rgba(91, 140, 255, .30);
   --glow-2: rgba(123, 91, 255, .28);
@@ -40,12 +42,30 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
   color: var(--text);
   display: grid;
   place-items: center;
   padding: 24px;
   transition: background-color .35s ease, color .35s ease;
+}
+
+/* Мобильные: облегчённая гифка (317 КБ вместо 2.1 МБ) и отказ от
+   background-attachment: fixed — на iOS Safari он тормозит скролл. */
+@media (max-width: 700px) {
+  body {
+    background-image: var(--gif-sm);
+    background-attachment: scroll;
+    background-position: center top;
+  }
+}
+
+@media (min-width: 701px) {
+  body { background-attachment: fixed; }
+}
+
+/* Уважаем системную настройку: вместо анимации — статичный кадр */
+@media (prefers-reduced-motion: reduce) {
+  body { background-image: var(--gif-poster); }
 }
 
 /* Затемнение и свечение — отдельным слоем поверх гифки.

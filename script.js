@@ -295,34 +295,52 @@
   /* ---------- звук 67 GAZAN ---------- */
 
   const sfx = document.getElementById('sfx');
-  const soundBtn = document.getElementById('soundToggle');
-  const soundIcon = document.getElementById('soundIcon');
 
   sfx.volume = 0.85;
 
-  // мем проигрывается по кнопке «67», но только если звук включён
-  onSequence = function (seq) {
-    if (seq === '67' && !sfx.paused) playSfx();
-  };
+  // Браузеры не дают играть звуку без жеста пользователя, поэтому «включение»
+  // происходит на первом нажатии любой кнопки. muted — пользователь сам
+  // выключил звук, после этого автостарт больше не срабатывает.
+  let soundMuted = false;
+  let unlocked = false;
 
   function playSfx() {
-    // повторное нажатие начинает звук с начала
-    sfx.currentTime = 0;
+    sfx.currentTime = 0;   // каждое нажатие начинает звук с начала
     const p = sfx.play();
     if (p && p.catch) p.catch(() => {});  // автоблокировка не должна сыпать ошибками
   }
 
-  soundBtn.addEventListener('click', function () {
-    if (sfx.paused) {
+  // Первое нажатие любой кнопки включает звук и сразу его проигрывает.
+  function unlockSound() {
+    if (unlocked || soundMuted) return;
+    unlocked = true;
+    playSfx();
+  }
+
+  // мем проигрывается по кнопке «67»
+  onSequence = function (seq) {
+    if (seq === '67' && !soundMuted) playSfx();
+  };
+
+  // «любая кнопка» = клик по сетке клавиш и любая клавиша калькулятора
+  keysEl.addEventListener('click', unlockSound, true);
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^[0-9]$/.test(e.key) || KEY_TO_BUTTON[e.key]) unlockSound();
+  }, true);
+
+  // выключить/включить звук — клавишей M
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key !== 'm' && e.key !== 'M' && e.key !== 'ь' && e.key !== 'Ь') return;
+    e.preventDefault();
+    if (soundMuted) {
+      soundMuted = false;
+      unlocked = true;
       playSfx();
-      soundBtn.setAttribute('aria-pressed', 'true');
-      soundIcon.textContent = '🔊';
-      soundBtn.classList.add('is-on');
     } else {
+      soundMuted = true;
       sfx.pause();
-      soundBtn.setAttribute('aria-pressed', 'false');
-      soundIcon.textContent = '🔇';
-      soundBtn.classList.remove('is-on');
     }
   });
 

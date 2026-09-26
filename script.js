@@ -88,6 +88,48 @@
     } else {
       exprEl.textContent = ' ';
     }
+
+    updateFx();
+  }
+
+  /* ---------- эффекты при вводе 67 ---------- */
+
+  const flyersEl = document.getElementById('flyers');
+  const has67 = () => !state.error && state.entry.indexOf('67') !== -1;
+  let fxOn = null;
+
+  function setFx(on) {
+    if (fxOn === on) return;
+    fxOn = on;
+    document.body.classList.toggle('fx-on', on);
+  }
+
+  function updateFx() {
+    setFx(has67());
+  }
+
+  // Пары «6» и «7». У 7 сдвиг на полпериода — это и даёт противофазе.
+  if (flyersEl) {
+    const COUNT = 7;
+    for (let i = 0; i < COUNT; i++) {
+      const pair = document.createElement('div');
+      pair.className = 'flyer';
+
+      const six = document.createElement('span');
+      six.className = 'flyer__n flyer__n--6';
+      six.textContent = '6';
+
+      const seven = document.createElement('span');
+      seven.className = 'flyer__n flyer__n--7';
+      seven.textContent = '7';
+
+      pair.append(six, seven);
+      pair.style.left = (7 + i * (86 / (COUNT - 1))).toFixed(2) + '%';
+      pair.style.setProperty('--dur', (5.2 + (i % 4) * 1.1).toFixed(2) + 's');
+      pair.style.setProperty('--delay', (-(i * 0.91)).toFixed(2) + 's');
+      pair.style.setProperty('--size', (38 + (i % 3) * 16) + 'px');
+      flyersEl.appendChild(pair);
+    }
   }
 
   function addHistory(a, op, b, result) {

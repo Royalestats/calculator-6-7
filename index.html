@@ -54,6 +54,19 @@
       <audio id="sfx" src="assets/67-gazan_0sRfU15.mp3" preload="auto"></audio>
     </main>
   </div>
+
+  <!-- Красные глаза на лице из гифки. Внутренний блок повторяет математику
+       background-size: cover, поэтому координаты совпадают с картинкой
+       при любом соотношении сторон экрана. -->
+  <div class="eyes" id="eyes" aria-hidden="true">
+    <div class="eyes__fit">
+      <span class="eyes__eye eyes__eye--l"></span>
+      <span class="eyes__eye eyes__eye--r"></span>
+    </div>
+  </div>
+
+  <!-- Летающие 6 и 7: пары в противофазе -->
+  <div class="flyers" id="flyers" aria-hidden="true"></div>
   <script src="script.js"></script>
 </body>
 </html>

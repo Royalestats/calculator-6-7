@@ -62,7 +62,7 @@ body::before {
     radial-gradient(900px 500px at 100% 100%, var(--glow-2), transparent 55%);
 }
 
-.wrap { width: 100%; max-width: 380px; position: relative; z-index: 1; }
+.wrap { width: 100%; max-width: 380px; position: relative; z-index: 3; }
 
 .calc {
   background: color-mix(in srgb, var(--panel) 88%, transparent);
@@ -239,6 +239,122 @@ body::before {
 .key--seq:hover {
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   color: var(--text);
+}
+
+/* ============================================================
+   Эффекты при вводе 67: красные глаза + летающие 6 и 7
+   ============================================================ */
+
+/* --- красные глаза поверх лица из гифки --- */
+.eyes {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+
+body.fx-on .eyes { opacity: 1; }
+
+/* Повторяет cover: элемент с пропорциями картинки, шире экрана при
+   необходимости, по центру. Тогда проценты внутри = координаты картинки. */
+.eyes__fit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100vw, calc(100vh * 16 / 9));
+  height: max(100vh, calc(100vw * 9 / 16));
+}
+
+.eyes__eye {
+  position: absolute;
+  width: 5.2%;
+  aspect-ratio: 2.1 / 1;
+  transform: translate(-50%, -50%) scale(.6);
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(255, 40, 30, .98) 0%,
+    rgba(255, 0, 0, .85) 32%,
+    rgba(220, 0, 0, .45) 58%,
+    transparent 78%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity .3s ease, transform .3s ease;
+}
+
+/* координаты найдены по кадру 480x270: левый глаз (200,54), правый (264,53) */
+.eyes__eye--l { left: 41.7%; top: 20%; }
+.eyes__eye--r { left: 55%;   top: 19.6%; }
+
+body.fx-on .eyes__eye {
+  opacity: 1;
+  animation: eyePulse 1.7s ease-in-out infinite;
+}
+
+body.fx-on .eyes__eye--r { animation-delay: .12s; }
+
+@keyframes eyePulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(.78); opacity: .55; }
+  50%      { transform: translate(-50%, -50%) scale(1.18); opacity: 1; }
+}
+
+/* --- летающие 6 и 7 --- */
+.flyers {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+  display: none;
+}
+
+body.fx-on .flyers { display: block; }
+
+.flyer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  animation: sway var(--dur) ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+
+.flyer__n {
+  font-size: var(--size, 54px);
+  font-weight: 800;
+  line-height: 1;
+  animation: fly var(--dur) linear infinite;
+  animation-delay: var(--delay);
+  will-change: transform;
+  text-shadow: 0 0 18px currentColor, 0 0 44px currentColor;
+}
+
+.flyer__n--6 { color: #ff2b2b; }
+.flyer__n--7 { color: #22e06a; }
+
+/* 7 со сдвигом на полпериода => строгое противофазе: 6 вверху — 7 внизу */
+.flyer__n--7 { animation-delay: calc(var(--delay) - var(--dur) / 2); }
+
+@keyframes fly {
+  from { transform: translateY(-46vh); }
+  to   { transform: translateY(46vh); }
+}
+
+@keyframes sway {
+  from { transform: translateX(-26px); }
+  to   { transform: translateX(26px); }
+}
+
+/* --- уважаем системную настройку движения --- */
+@media (prefers-reduced-motion: reduce) {
+  .flyers { display: none !important; }
+  body.fx-on .eyes__eye { animation: none; opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 @media (max-width: 420px) {
